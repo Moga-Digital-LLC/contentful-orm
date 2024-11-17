@@ -7,9 +7,10 @@
     "build": "tsc"
   },
   "dependencies": {
-    "contentful-orm": "file:../.."
+    "contentful-orm": "file:../../",
+    "dotenv": "^16.0.3",
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^4.9.0"
   }
 }
