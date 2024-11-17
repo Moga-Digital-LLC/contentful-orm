@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Example blog using contentful-orm",
   "scripts": {
-    "sync": "node ../../dist/cli/index.js sync --path=\"src/entities/**/*.ts\"",
+    "sync": "npx contentful-orm sync --path=\"src/entities/**/*.ts\"",
     "build": "tsc"
   },
   "dependencies": {
