@@ -141,6 +141,8 @@ npx contentful-orm sync --environment="staging"
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+https://github.com/Moga-Digital-LLC/contentful-orm
+
 ## License
 
 MIT

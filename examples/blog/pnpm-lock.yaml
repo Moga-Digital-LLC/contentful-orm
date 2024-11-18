@@ -9,13 +9,13 @@ importers:
   .:
     dependencies:
       contentful-orm:
-        specifier: file:../../
-        version: file:../..(@types/node@22.9.0)(typescript@5.6.3)
+        specifier: ^0.1.1
+        version: 0.1.1(@types/node@22.9.0)(typescript@5.6.3)
       dotenv:
         specifier: ^16.0.3
         version: 16.4.5
       typescript:
-        specifier: ^5.0.0
+        specifier: ^5.3.3
         version: 5.6.3
 
 packages:
@@ -123,8 +123,8 @@ packages:
     resolution: {integrity: sha512-swOTlKO6AeCRnD5w237ey6wKDXty8shFVm0AisKO2w5seQINlFytgCkZd89E0lxjg4zgjb9maa7AScUtyQUd5w==}
     engines: {node: '>=14'}
 
-  contentful-orm@file:../..:
-    resolution: {directory: ../.., type: directory}
+  contentful-orm@0.1.1:
+    resolution: {integrity: sha512-eLSGLhGmrbvzvROH8+GrrVcQ20sPqoUGxmEXeAMutPx+KfP5u04Mas6VoRghmmxJZoLsfZdoD1PUiKgpHoBYJQ==}
     hasBin: true
 
   contentful-sdk-core@8.3.2:
@@ -481,7 +481,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  contentful-orm@file:../..(@types/node@22.9.0)(typescript@5.6.3):
+  contentful-orm@0.1.1(@types/node@22.9.0)(typescript@5.6.3):
     dependencies:
       commander: 9.5.0
       contentful-management: 10.46.4

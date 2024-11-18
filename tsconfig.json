@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "lib": ["es2018"],
+    "target": "ES2022",
+    "module": "NodeNext",
+    "lib": ["ES2022"],
     "declaration": true,
     "outDir": "./dist",
     "rootDir": "./src",
@@ -11,7 +11,9 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "NodeNext",
+    "useDefineForClassFields": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist", "**/__tests__/*"]
