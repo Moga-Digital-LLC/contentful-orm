@@ -4,13 +4,18 @@ import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
 @ContentType({
   name: 'article',
   displayField: 'title',
-  description: 'Article with various text fields'
+  description: 'Simple article with title and content'
 })
 export class Article {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{ size: { min: 3, max: 100 } }]
+    validations: [{
+      size: {
+        min: 3,
+        max: 100
+      }
+    }]
   })
   title!: string;
 
@@ -18,14 +23,14 @@ export class Article {
     type: ContentfulFieldType.RichText,
     required: true
   })
-  content!: any; // Rich text is represented as a complex object
+  content!: any;
 }
 
 // Example 2: Numeric and Date Fields
 @ContentType({
   name: 'product',
   displayField: 'name',
-  description: 'Product with price and dates'
+  description: 'Product with price and release date'
 })
 export class Product {
   @Field({
@@ -37,7 +42,11 @@ export class Product {
   @Field({
     type: ContentfulFieldType.Number,
     required: true,
-    validations: [{ range: { min: 0 } }]
+    validations: [{
+      range: {
+        min: 0
+      }
+    }]
   })
   price!: number;
 
@@ -45,7 +54,7 @@ export class Product {
     type: ContentfulFieldType.Date,
     required: true
   })
-  releaseDate!: string; // ISO date string
+  releaseDate!: Date;
 }
 
 // Example 3: Location and Media Fields
@@ -65,21 +74,14 @@ export class Store {
     type: ContentfulFieldType.Location,
     required: true
   })
-  location!: {
-    lat: number;
-    lon: number;
-  };
+  location!: any;
 
   @Field({
     type: ContentfulFieldType.Media,
-    required: false,
-    validations: [
-      {
-        linkMimetypeGroup: ['image']
-      }
-    ]
+    itemsLinkType: 'Asset',
+    validations: []
   })
-  storeImage!: any; // Asset reference
+  storeImage!: any;
 }
 
 // Example 4: Boolean and Reference Fields
@@ -117,7 +119,7 @@ export class Subscription {
 @ContentType({
   name: 'gallery',
   displayField: 'title',
-  description: 'Photo gallery with multiple images and tags'
+  description: 'Image gallery with tags and locations'
 })
 export class Gallery {
   @Field({
@@ -128,45 +130,77 @@ export class Gallery {
 
   @Field({
     type: ContentfulFieldType.Array,
-    required: false,
     itemsType: ContentfulFieldType.Media,
-    itemsLinkType: 'Asset',
-    items: {
-      validations: [
-        {
-          linkMimetypeGroup: ['image']
-        }
-      ]
-    }
+    itemsLinkType: 'Asset'
   })
-  images!: any[]; // Array of image assets
+  images!: any[];
 
   @Field({
     type: ContentfulFieldType.Array,
-    required: false,
     itemsType: ContentfulFieldType.Text,
     items: {
-      validations: [
-        {
-          size: { min: 1, max: 20 }
+      validations: [{
+        size: {
+          min: 1,
+          max: 20
         }
-      ]
+      }]
     }
   })
   tags!: string[];
 
   @Field({
     type: ContentfulFieldType.Array,
-    required: false,
     itemsType: ContentfulFieldType.Reference,
     itemsLinkType: 'Entry',
     items: {
-      validations: [
-        {
-          linkContentType: ['store']
-        }
-      ]
+      validations: [{
+        linkContentType: ['store']
+      }]
     }
   })
-  locations!: any[]; // Array of Store references
+  locations!: any[];
+}
+
+@ContentType({
+  name: 'event',
+  displayField: 'name',
+  description: 'Event with date, location, and attendees'
+})
+export class Event {
+  @Field({
+    type: ContentfulFieldType.Text,
+    required: true
+  })
+  name!: string;
+
+  @Field({
+    type: ContentfulFieldType.Date,
+    required: true
+  })
+  startDate!: Date;
+
+  @Field({
+    type: ContentfulFieldType.Date,
+    required: true
+  })
+  endDate!: Date;
+
+  @Field({
+    type: ContentfulFieldType.Location,
+    required: true
+  })
+  location!: any;
+
+  @Field({
+    type: ContentfulFieldType.Array,
+    itemsType: ContentfulFieldType.Reference,
+    itemsLinkType: 'Entry',
+    items: {
+      validations: [{
+        linkContentType: ['person']
+      }]
+    }
+  })
+  attendees!: any[];
 }

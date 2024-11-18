@@ -25,7 +25,11 @@ export class Category {
     required: true,
     validations: [
       { size: { min: 2, max: 50 } },
-      { regexp: { pattern: '^[a-z0-9-]+$' } }
+      {
+        regexp: {
+          pattern: '^[a-z0-9-]+$'
+        }
+      }
     ]
   })
   slug!: string;
@@ -33,7 +37,6 @@ export class Category {
   @Field({
     type: ContentfulFieldType.Reference,
     required: false,
-    linkType: 'Entry',
     validations: [{ linkContentType: ['category'] }]
   })
   parentCategory?: string;

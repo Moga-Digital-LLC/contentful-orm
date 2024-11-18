@@ -1,8 +1,12 @@
-import { createClient } from 'contentful-management';
-import { ContentTypeOptions, FieldOptions, ContentfulFieldType } from '../types';
-import { getContentTypeMetadata, getFieldsMetadata } from '../decorators';
+import contentfulManagement from 'contentful-management';
+import { ContentTypeOptions, FieldOptions, ContentfulFieldType } from '../types/index.js';
+import { getContentTypeMetadata, getFieldsMetadata } from '../decorators/index.js';
+import { ContentfulValidation, ContentfulSpaceId, ContentfulEnvironmentId } from '../types/contentful.js';
 
-const CONTENTFUL_FIELD_TYPES: Record<string, string> = {
+type ContentTypeFieldValidation = any;
+type ContentFields<T> = any;
+
+const CONTENTFUL_FIELD_TYPES: Record<typeof ContentfulFieldType[keyof typeof ContentfulFieldType], string> = {
   [ContentfulFieldType.Text]: 'Symbol',
   [ContentfulFieldType.RichText]: 'RichText',
   [ContentfulFieldType.Number]: 'Number',
@@ -12,31 +16,69 @@ const CONTENTFUL_FIELD_TYPES: Record<string, string> = {
   [ContentfulFieldType.Boolean]: 'Boolean',
   [ContentfulFieldType.Reference]: 'Link',
   [ContentfulFieldType.Array]: 'Array'
-};
-
-interface ContentfulField {
-  id: string;
-  name: string;
-  type: string;
-  required: boolean;
-  localized: boolean;
-  validations: any[];
-  linkType?: string;
-  items?: {
-    type: string;
-    linkType?: string;
-    validations?: any[];
-  };
-}
+} as const;
 
 export class ContentfulSync {
-  private client;
+  private readonly client: ReturnType<typeof contentfulManagement.createClient>;
+  private readonly space: Promise<any>;
+  private readonly environment: Promise<any>;
+  private readonly spaceId: ContentfulSpaceId;
+  private readonly environmentId: ContentfulEnvironmentId;
 
-  constructor(accessToken: string) {
-    this.client = createClient({ accessToken });
+  constructor(accessToken: string, spaceId: ContentfulSpaceId, environmentId: ContentfulEnvironmentId = 'master') {
+    this.client = contentfulManagement.createClient({ accessToken });
+    this.spaceId = spaceId;
+    this.environmentId = environmentId;
+    this.space = this.client.getSpace(spaceId);
+    this.environment = this.space.then(space => space.getEnvironment(environmentId));
   }
 
-  async syncContentType(entity: Function, spaceId: string, environmentId: string = 'master') {
+  private transformValidation(validation: ContentfulValidation): ContentTypeFieldValidation {
+    if (validation.regexp) {
+      const { pattern, flags } = validation.regexp;
+      return {
+        ...validation,
+        regexp: {
+          pattern,
+          flags: flags ?? ''
+        }
+      } as ContentTypeFieldValidation;
+    }
+    return validation as ContentTypeFieldValidation;
+  }
+
+  private transformFieldsToContentful(fieldsMap: Map<string, FieldOptions>) {
+    const fieldsMetadata = Object.fromEntries(fieldsMap);
+    return Object.entries(fieldsMetadata).map(([id, options]) => {
+      const field: ContentFields<any> = {
+        id,
+        name: id,
+        type: CONTENTFUL_FIELD_TYPES[options.type],
+        required: options.required ?? false,
+        localized: options.localized ?? false,
+        validations: options.validations?.map((v: ContentfulValidation) => this.transformValidation(v)) ?? []
+      };
+
+      if (options.type === ContentfulFieldType.Array && options.itemsType) {
+        field.items = {
+          type: CONTENTFUL_FIELD_TYPES[options.itemsType],
+          validations: options.items?.validations?.map((v: ContentfulValidation) => this.transformValidation(v)) ?? []
+        };
+
+        if (options.itemsLinkType) {
+          field.items.linkType = options.itemsLinkType;
+        }
+      }
+
+      if (options.type === ContentfulFieldType.Reference || options.type === ContentfulFieldType.Media) {
+        field.linkType = options.itemsLinkType ?? 'Entry';
+      }
+
+      return field;
+    });
+  }
+
+  async syncContentType(entity: Function): Promise<void> {
     const contentTypeMetadata = getContentTypeMetadata(entity);
     if (!contentTypeMetadata) {
       throw new Error(`No content type metadata found for ${entity.name}`);
@@ -47,10 +89,8 @@ export class ContentfulSync {
     const fields = this.transformFieldsToContentful(fieldsMetadata);
     console.log('Transformed fields:', JSON.stringify(fields, null, 2));
 
-    const space = await this.client.getSpace(spaceId);
-    console.log('Connected to space:', spaceId);
-    const environment = await (space.getEnvironment as any)(environmentId || 'master');
-    console.log('Connected to environment:', environmentId || 'master');
+    console.log(`Using space: ${this.spaceId}, environment: ${this.environmentId}`);
+    const environment = await this.environment;
 
     try {
       console.log(`Checking if content type ${contentTypeMetadata.name} exists...`);
@@ -76,8 +116,8 @@ export class ContentfulSync {
       console.log('Content type updated, publishing...');
       await updatedContentType.publish();
       console.log('Content type published successfully');
-    } catch (error: any) {
-      if (error?.name === 'NotFound') {
+    } catch (error) {
+      if (error instanceof Error && 'name' in error && error.name === 'NotFound') {
         console.log('Content type not found, creating new...');
         const contentType = await environment.createContentTypeWithId(
           contentTypeMetadata.name,
@@ -85,7 +125,7 @@ export class ContentfulSync {
             name: contentTypeMetadata.name,
             displayField: contentTypeMetadata.displayField,
             description: contentTypeMetadata.description,
-            fields: fields as any
+            fields
           }
         );
         console.log('Content type created, publishing...');
@@ -96,32 +136,5 @@ export class ContentfulSync {
         throw error;
       }
     }
-  }
-
-  private transformFieldsToContentful(fieldsMetadata: Record<string, FieldOptions>): ContentfulField[] {
-    return Object.entries(fieldsMetadata).map(([id, options]) => {
-      const field: ContentfulField = {
-        id,
-        name: id,
-        type: CONTENTFUL_FIELD_TYPES[options.type] || options.type,
-        required: options.required || false,
-        localized: options.localized || false,
-        validations: options.validations || []
-      };
-
-      if (options.type === ContentfulFieldType.Media || options.type === ContentfulFieldType.Reference) {
-        field.linkType = options.type === ContentfulFieldType.Media ? 'Asset' : 'Entry';
-      }
-
-      if (options.type === ContentfulFieldType.Array && options.itemsType) {
-        field.items = {
-          type: CONTENTFUL_FIELD_TYPES[options.itemsType] || options.itemsType,
-          ...(options.itemsLinkType && { linkType: options.itemsLinkType }),
-          ...(options.items?.validations && { validations: options.items.validations })
-        };
-      }
-
-      return field;
-    });
   }
 }

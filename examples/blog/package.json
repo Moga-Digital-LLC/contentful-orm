@@ -2,13 +2,17 @@
   "name": "contentful-orm-blog-example",
   "version": "1.0.0",
   "description": "Example blog using contentful-orm",
+  "type": "module",
   "scripts": {
-    "sync": "npx contentful-orm sync --path=\"src/entities/**/*.ts\"",
+    "sync": "tsc && node ../../dist/cli/index.js sync --path=\"dist/entities/**/*.js\"",
     "build": "tsc"
   },
   "dependencies": {
-    "contentful-orm": "^0.1.1",
+    "contentful-orm": "file:../..",
     "dotenv": "^16.0.3",
     "typescript": "^5.3.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19"
   }
 }

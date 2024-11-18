@@ -9,19 +9,22 @@ export class Author {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{ size: { min: 2, max: 100 } }]
+    validations: [{
+      size: {
+        min: 2,
+        max: 100
+      }
+    }]
   })
   name!: string;
 
   @Field({
     type: ContentfulFieldType.Text,
-    required: false
   })
   email!: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
-    required: false,
     validations: [
       {
         enabledNodeTypes: [
@@ -33,16 +36,20 @@ export class Author {
         ]
       },
       {
-        enabledMarks: ['bold', 'italic', 'underline']
+        enabledMarks: [
+          'bold',
+          'italic',
+          'underline'
+        ]
       }
     ]
   })
-  bio!: string;
+  bio!: any;
 
   @Field({
     type: ContentfulFieldType.Media,
-    required: false,
-    validations: [{ linkMimetypeGroup: ['image'] }]
+    itemsLinkType: 'Asset',
+    validations: []
   })
-  avatar!: string;
+  avatar!: any;
 }

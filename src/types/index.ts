@@ -1,46 +1,33 @@
-export enum ContentfulFieldType {
-  Text = 'Text',
-  RichText = 'RichText',
-  Number = 'Number',
-  Date = 'Date',
-  Location = 'Location',
-  Media = 'Media',
-  Boolean = 'Boolean',
-  Reference = 'Link',
-  Array = 'Array'
-}
+import { ContentfulField, ContentfulValidation, ContentfulEnvironmentId, ContentfulSpaceId } from './contentful.js';
+
+export const ContentfulFieldType = {
+  Text: 'Text',
+  RichText: 'RichText',
+  Number: 'Number',
+  Date: 'Date',
+  Location: 'Location',
+  Media: 'Media',
+  Boolean: 'Boolean',
+  Reference: 'Reference',
+  Array: 'Array'
+} as const;
 
 export interface ContentTypeOptions {
   name: string;
-  displayField?: string;
+  displayField: string;
   description?: string;
 }
 
-export interface FieldValidation {
-  size?: { min?: number; max?: number };
-  regexp?: { pattern: string; flags?: string };
-  range?: { min?: number; max?: number };
-  linkMimetypeGroup?: string[];
-  linkContentType?: string[];
-  enabledMarks?: string[];
-  enabledNodeTypes?: string[];
-}
-
 export interface FieldOptions {
-  type: ContentfulFieldType;
+  type: typeof ContentfulFieldType[keyof typeof ContentfulFieldType];
   required?: boolean;
   localized?: boolean;
-  validations?: FieldValidation[];
-  linkType?: string;
-  itemsType?: ContentfulFieldType;
-  itemsLinkType?: string;
+  validations?: ContentfulValidation[];
+  itemsType?: typeof ContentfulFieldType[keyof typeof ContentfulFieldType];
+  itemsLinkType?: 'Entry' | 'Asset';
   items?: {
-    validations?: FieldValidation[];
+    validations?: ContentfulValidation[];
   };
 }
 
-export interface ContentfulConfig {
-  space: string;
-  accessToken: string;
-  environment?: string;
-}
+export type { ContentfulField, ContentfulValidation, ContentfulEnvironmentId, ContentfulSpaceId };

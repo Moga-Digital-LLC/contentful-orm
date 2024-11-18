@@ -40,7 +40,6 @@ export class BlogPost {
           'heading-3',
           'paragraph',
           'blockquote',
-          'code',
           'embedded-asset-block',
           'unordered-list',
           'ordered-list',
@@ -48,7 +47,7 @@ export class BlogPost {
         ]
       },
       {
-        enabledMarks: ['bold', 'italic', 'code', 'underline']
+        enabledMarks: ['bold', 'italic', 'underline']
       }
     ]
   })
@@ -64,15 +63,14 @@ export class BlogPost {
 
   @Field({
     type: ContentfulFieldType.Media,
-    required: false,
-    validations: [{ linkMimetypeGroup: ['image'] }]
+    itemsLinkType: 'Asset',
+    validations: []
   })
-  featuredImage?: string;
+  featuredImage!: any;
 
   @Field({
     type: ContentfulFieldType.Reference,
     required: true,
-    linkType: 'Entry',
     validations: [
       {
         linkContentType: ['author']

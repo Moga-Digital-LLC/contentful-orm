@@ -1,3 +1,3 @@
-export * from './author';
-export * from './category';
-export * from './blog-post';
+export * from './author.js';
+export * from './category.js';
+export * from './blog-post.js';

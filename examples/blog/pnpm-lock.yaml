@@ -9,14 +9,21 @@ importers:
   .:
     dependencies:
       contentful-orm:
-        specifier: ^0.1.1
-        version: 0.1.1(@types/node@22.9.0)(typescript@5.6.3)
+        specifier: file:../..
+        version: file:../..(@types/node@20.17.6)(typescript@5.6.3)
       dotenv:
         specifier: ^16.0.3
         version: 16.4.5
       typescript:
         specifier: ^5.3.3
         version: 5.6.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.19
+        version: 20.17.6
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.17.6)(typescript@5.6.3)
 
 packages:
 
@@ -57,8 +64,8 @@ packages:
   '@types/json-patch@0.0.30':
     resolution: {integrity: sha512-MhCUjojzDhVLnZnxwPwa+rETFRDQ0ffjxYdrqOP6TBO2O0/Z64PV5tNeYApo4bc4y4frbWOrRwv/eEkXlI13Rw==}
 
-  '@types/node@22.9.0':
-    resolution: {integrity: sha512-vuyHg81vvWA1Z1ELfvLko2c8f34gyA0zaic0+Rllc5lbCnbSyuvb2Oxpm6TAUAC/2xZN3QGqxBNggD1nNR2AfQ==}
+  '@types/node@20.17.6':
+    resolution: {integrity: sha512-VEI7OdvK2wP7XHnsuXbAJnEpEkF6NjSN45QJlL4VGqZSXsnicpesdTWsg9RISeSdYd3yeRj/y3k5KGjUXYnFwQ==}
 
   acorn-walk@8.3.4:
     resolution: {integrity: sha512-ueEepnujpqee2o5aIYnvHU6C0A42MNdsIDeqy5BydrkuC5R1ZuUFnm27EeFJGoEHJQgn3uleRvmTXaJgfXbt4g==}
@@ -123,8 +130,8 @@ packages:
     resolution: {integrity: sha512-swOTlKO6AeCRnD5w237ey6wKDXty8shFVm0AisKO2w5seQINlFytgCkZd89E0lxjg4zgjb9maa7AScUtyQUd5w==}
     engines: {node: '>=14'}
 
-  contentful-orm@0.1.1:
-    resolution: {integrity: sha512-eLSGLhGmrbvzvROH8+GrrVcQ20sPqoUGxmEXeAMutPx+KfP5u04Mas6VoRghmmxJZoLsfZdoD1PUiKgpHoBYJQ==}
+  contentful-orm@file:../..:
+    resolution: {directory: ../.., type: directory}
     hasBin: true
 
   contentful-sdk-core@8.3.2:
@@ -411,7 +418,7 @@ snapshots:
 
   '@types/json-patch@0.0.30': {}
 
-  '@types/node@22.9.0':
+  '@types/node@20.17.6':
     dependencies:
       undici-types: 6.19.8
 
@@ -481,14 +488,14 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  contentful-orm@0.1.1(@types/node@22.9.0)(typescript@5.6.3):
+  contentful-orm@file:../..(@types/node@20.17.6)(typescript@5.6.3):
     dependencies:
       commander: 9.5.0
       contentful-management: 10.46.4
       dotenv: 16.4.5
       glob: 11.0.0
       reflect-metadata: 0.1.14
-      ts-node: 10.9.2(@types/node@22.9.0)(typescript@5.6.3)
+      ts-node: 10.9.2(@types/node@20.17.6)(typescript@5.6.3)
     transitivePeerDependencies:
       - '@swc/core'
       - '@swc/wasm'
@@ -681,14 +688,14 @@ snapshots:
     dependencies:
       ansi-regex: 6.1.0
 
-  ts-node@10.9.2(@types/node@22.9.0)(typescript@5.6.3):
+  ts-node@10.9.2(@types/node@20.17.6)(typescript@5.6.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.9.0
+      '@types/node': 20.17.6
       acorn: 8.14.0
       acorn-walk: 8.3.4
       arg: 4.1.3
