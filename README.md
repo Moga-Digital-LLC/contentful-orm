@@ -2,6 +2,8 @@
 
 A TypeScript-first ORM for Contentful CMS that enables a code-first approach to content modeling. Define your content types using TypeScript decorators and automatically sync them with Contentful.
 
+> **Note**: This guide represents the current implementation approach until version 1.0 is released. The API and setup process may change in future releases.
+
 ## Features
 
 - 🎯 Code-First Development
@@ -16,154 +18,225 @@ A TypeScript-first ORM for Contentful CMS that enables a code-first approach to 
 ## Requirements
 
 - TypeScript 5.2 or higher
-- Node.js 16 or higher
+- Node.js 18 or higher
 
-## Installation
+## Setup Guide
+
+### Installation
 
 ```bash
-npm install contentful-orm
+# Using npm
+npm install contentful-orm reflect-metadata cross-env ts-node --save-dev
+
+# Using pnpm
+pnpm add contentful-orm reflect-metadata cross-env ts-node -D
+
+# Using yarn
+yarn add contentful-orm reflect-metadata cross-env ts-node --dev
 ```
 
-## Configuration
+### Configuration
 
-1. Configure TypeScript to use Stage 3 decorators in your `tsconfig.json`:
+#### 1. Environment Variables
+
+Create a `.env` file in your project root:
+
+```env
+CONTENTFUL_SPACE_ID=your_space_id
+CONTENTFUL_ACCESS_TOKEN=your_access_token
+CONTENTFUL_ENVIRONMENT=master  # or your preferred environment
+```
+
+#### 2. TypeScript Configuration
+
+Create a dedicated `tsconfig.contentful.json` for model compilation:
 
 ```json
 {
   "compilerOptions": {
     "target": "ES2022",
-    "experimentalDecorators": false,
-    "emitDecoratorMetadata": false,
-    "decorators": {
-      "version": "2023-05"
-    }
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "useDefineForClassFields": false,
+    "outDir": "./dist/models",
+    "rootDir": "./src"
+  },
+  "include": ["src/models/**/*.ts"]
+}
+```
+
+#### 3. Package.json Scripts
+
+Add these scripts to your `package.json`:
+
+```json
+{
+  "scripts": {
+    "compile-models": "tsc --project tsconfig.contentful.json",
+    "sync": "pnpm compile-models && cross-env TS_NODE_PROJECT=./tsconfig.contentful.json ts-node ./node_modules/contentful-orm/dist/cli/index.js sync --path=\"dist/models/**/*.js\""
   }
 }
 ```
 
-2. Configure your Contentful credentials:
+### Creating Models
 
-Create a `.env` file:
-```env
-CONTENTFUL_SPACE_ID=your-space-id
-CONTENTFUL_ACCESS_TOKEN=your-management-token
-CONTENTFUL_ENVIRONMENT=master # optional, defaults to 'master'
-```
-
-## Quick Start
-
-1. Define your content types using accessor properties:
+Create your models in `src/models/` using TypeScript decorators:
 
 ```typescript
-import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
+import 'reflect-metadata';
+import { ContentType, Field } from 'contentful-orm';
 
-@ContentType({
-  name: 'blogPost',
-  displayField: 'title',
-  description: 'A blog post entry'
-})
-class BlogPost {
+@ContentType('teamMember')
+export class TeamMember {
   @Field({
-    type: ContentfulFieldType.Text,
+    type: 'Symbol',
     required: true,
-    validations: [{ size: { min: 3, max: 512 } }]
+    validations: [{ size: { min: 2, max: 100 } }]
   })
-  accessor title: string;
+  name: string;
 
   @Field({
-    type: ContentfulFieldType.RichText,
-    required: true
+    type: 'RichText',
+    required: true,
+    validations: [{
+      enabledNodeTypes: [
+        'paragraph',
+        'heading-1',
+        'heading-2',
+        'unordered-list',
+        'ordered-list'
+      ],
+      enabledMarks: ['bold', 'italic', 'underline']
+    }]
   })
-  accessor content: string;
+  bio: string;
 
   @Field({
-    type: ContentfulFieldType.Date,
-    required: true
+    type: 'Link',
+    linkType: 'Asset',
+    validations: [{ linkMimetypeGroup: ['image'] }]
   })
-  accessor publishDate: string;
-
-  @Field({
-    type: ContentfulFieldType.Reference,
-    linkType: 'Entry',
-    validations: [{ linkContentType: ['author'] }]
-  })
-  accessor author: string;
+  image?: string;
 }
 ```
 
-2. Sync your content types with Contentful:
+### Available Field Types
 
-```bash
-npx contentful-orm sync --path="src/entities/**/*.ts"
-```
+- `Symbol`: For short text (< 256 characters)
+- `Text`: For longer text
+- `RichText`: For formatted text with markdown
+- `Integer`: For whole numbers
+- `Number`: For decimal numbers
+- `Date`: For dates and times
+- `Boolean`: For true/false values
+- `Link`: For references to assets or other entries
+- `Array`: For lists of items
+- `Object`: For JSON objects
 
-## Field Types
-
-All Contentful field types are supported:
-
-- Text
-- RichText
-- Number
-- Date
-- Location
-- Media
-- Boolean
-- Reference (Link)
-- Array
-
-## Field Options
-
-Each field can be configured with various options:
+### Field Decorator Options
 
 ```typescript
-@Field({
-  type: ContentfulFieldType.Text,
-  required: true,
-  localized: true,
-  validations: [
-    { size: { min: 5, max: 100 } },
-    { regexp: { pattern: '^[A-Za-z0-9]+$' } }
-  ]
-})
-accessor title: string;
+interface FieldOptions {
+  type: string;
+  required?: boolean;
+  localized?: boolean;
+  linkType?: 'Asset' | 'Entry';
+  validations?: any[];
+  items?: {
+    type: string;
+    validations?: any[];
+    linkType?: string;
+  };
+}
 ```
 
-## CLI Usage
+### Syncing with Contentful
 
-The CLI tool provides several commands for managing your content types:
-
+1. Compile your models:
 ```bash
-# Sync all content types
-npx contentful-orm sync
-
-# Sync specific path
-npx contentful-orm sync --path="src/models/*.ts"
-
-# Sync to specific environment
-npx contentful-orm sync --environment="staging"
+pnpm run compile-models
 ```
 
-## Best Practices
+2. Sync with Contentful:
+```bash
+pnpm run sync
+```
 
-### Decorator Usage
-- Use `accessor` keyword for all properties decorated with `@Field`
-- Keep decorators simple and focused
-- Use appropriate field types and validations
+### Validation Rules
 
-### Naming Conventions
-- Use PascalCase for content type classes
-- Use camelCase for field names
-- Use descriptive names for both
+Common validation options:
 
-### Validation
-- Always specify required fields
-- Add appropriate validations for fields
-- Use specific link content type validations for references
+```typescript
+// Size validation
+validations: [{ size: { min: 2, max: 100 } }]
 
-### Organization
-- Keep one content type per file
-- Group related content types in directories
-- Use index files to export multiple content types
+// Unique values
+validations: [{ unique: true }]
+
+// Rich text configuration
+validations: [{
+  enabledNodeTypes: ['paragraph', 'heading-1'],
+  enabledMarks: ['bold', 'italic']
+}]
+
+// Asset type validation
+validations: [{ linkMimetypeGroup: ['image'] }]
+
+// Array item validation
+items: {
+  type: 'Symbol',
+  validations: [{ size: { min: 2, max: 50 } }]
+}
+```
+
+### Troubleshooting
+
+1. **Decorator Errors**
+   - Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in your TypeScript config
+   - Import `reflect-metadata` at the top of your model files
+
+2. **Module Resolution Issues**
+   - Use `moduleResolution: "bundler"` for ESM projects
+   - Ensure your project's `type` in `package.json` matches your module system
+
+3. **Sync Failures**
+   - Check your environment variables are correctly set
+   - Verify your Contentful access token has management API permissions
+   - Ensure your models are properly compiled before syncing
+
+### Best Practices
+
+1. **Model Organization**
+   - Keep models in a dedicated `src/models` directory
+   - One model per file
+   - Use clear, descriptive names for models and fields
+
+2. **Field Validation**
+   - Always add appropriate validations
+   - Set reasonable size limits for text fields
+   - Configure rich text fields with only necessary features
+
+3. **Type Safety**
+   - Use TypeScript's strict mode
+   - Define proper types for all fields
+   - Utilize interfaces for complex field types
+
+### Limitations
+
+- Contentful-orm currently works best with Node.js LTS versions
+- Some advanced Contentful features may require manual configuration
+- Changes to content types may require migration in production environments
+
+## Examples
+
+Check out the [examples](./examples) directory for complete working examples:
+- Blog example with authors, posts, and categories
+- Content type examples showcasing different field types and configurations
 
 ## Contributing
 
