@@ -19,19 +19,19 @@ class Post {
       }
     ]
   })
-  accessor title: string;
+  title: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
     required: true
   })
-  accessor content: string;
+  content: string;
 
   @Field({
     type: ContentfulFieldType.Date,
     required: true
   })
-  accessor publishDate: Date;
+  publishDate: Date;
 
   @Field({
     type: ContentfulFieldType.Array,
@@ -44,7 +44,7 @@ class Post {
       }
     ]
   })
-  accessor tags: string[];
+  tags: string[];
 }
 
 export default Post;
