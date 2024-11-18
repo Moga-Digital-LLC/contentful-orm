@@ -1,6 +1,6 @@
 {
   "name": "contentful-orm",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A TypeScript-first ORM for Contentful CMS that enables a code-first approach to content modeling",
   "type": "module",
   "main": "dist/index.js",
