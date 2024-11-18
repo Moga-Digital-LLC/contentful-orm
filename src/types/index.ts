@@ -12,6 +12,8 @@ export const ContentfulFieldType = {
   Array: 'Array'
 } as const;
 
+export type ContentfulFieldTypeValues = typeof ContentfulFieldType[keyof typeof ContentfulFieldType];
+
 export interface ContentTypeOptions {
   name: string;
   displayField: string;
@@ -19,11 +21,11 @@ export interface ContentTypeOptions {
 }
 
 export interface FieldOptions {
-  type: typeof ContentfulFieldType[keyof typeof ContentfulFieldType];
+  type: ContentfulFieldTypeValues;
   required?: boolean;
   localized?: boolean;
   validations?: ContentfulValidation[];
-  itemsType?: typeof ContentfulFieldType[keyof typeof ContentfulFieldType];
+  itemsType?: ContentfulFieldTypeValues;
   itemsLinkType?: 'Entry' | 'Asset';
   items?: {
     validations?: ContentfulValidation[];

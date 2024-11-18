@@ -3,17 +3,22 @@
   "version": "1.0.0",
   "description": "Example blog using contentful-orm",
   "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "sync": "node ../../dist/cli/index.js sync --path=\"dist/entities/**/*.ts\"",
-    "sync_ts": "node ../../dist/cli/index.js sync --path=\"src/entities/**/*.ts\"",
-    "build": "tsc"
+    "sync": "node ../../dist/cli/index.js sync --path=\"dist/entities/**/*.js\"",
+    "sync_ts": "ts-node --esm ../../dist/cli/index.js sync --path=\"src/entities/**/*.ts\"",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "dependencies": {
     "contentful-orm": "file:../..",
     "dotenv": "^16.0.3",
+    "reflect-metadata": "^0.2.1",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@types/node": "^20.11.19"
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.1"
   }
 }
