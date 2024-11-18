@@ -5,7 +5,7 @@ A TypeScript-first ORM for Contentful CMS that enables a code-first approach to 
 ## Features
 
 - 🎯 Code-First Development
-- 📝 TypeScript Decorators
+- 📝 TypeScript Stage 3 Decorators
 - 🔄 Automatic Content Type Synchronization
 - 🛠️ CLI Tools
 - 💪 Type Safety
@@ -13,15 +13,35 @@ A TypeScript-first ORM for Contentful CMS that enables a code-first approach to 
 - 🔗 Reference Field Support
 - ✨ Rich Text Support
 
+## Requirements
+
+- TypeScript 5.2 or higher
+- Node.js 16 or higher
+
 ## Installation
 
 ```bash
 npm install contentful-orm
 ```
 
-## Quick Start
+## Configuration
 
-1. Configure your Contentful credentials:
+1. Configure TypeScript to use Stage 3 decorators in your `tsconfig.json`:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "experimentalDecorators": false,
+    "emitDecoratorMetadata": false,
+    "decorators": {
+      "version": "2023-05"
+    }
+  }
+}
+```
+
+2. Configure your Contentful credentials:
 
 Create a `.env` file:
 ```env
@@ -30,7 +50,9 @@ CONTENTFUL_ACCESS_TOKEN=your-management-token
 CONTENTFUL_ENVIRONMENT=master # optional, defaults to 'master'
 ```
 
-2. Define your content types:
+## Quick Start
+
+1. Define your content types using accessor properties:
 
 ```typescript
 import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
@@ -46,30 +68,30 @@ class BlogPost {
     required: true,
     validations: [{ size: { min: 3, max: 512 } }]
   })
-  title: string;
+  accessor title: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
     required: true
   })
-  content: string;
+  accessor content: string;
 
   @Field({
     type: ContentfulFieldType.Date,
     required: true
   })
-  publishDate: string;
+  accessor publishDate: string;
 
   @Field({
     type: ContentfulFieldType.Reference,
     linkType: 'Entry',
     validations: [{ linkContentType: ['author'] }]
   })
-  author: string;
+  accessor author: string;
 }
 ```
 
-3. Sync your content types with Contentful:
+2. Sync your content types with Contentful:
 
 ```bash
 npx contentful-orm sync --path="src/entities/**/*.ts"
@@ -103,6 +125,7 @@ Each field can be configured with various options:
     { regexp: { pattern: '^[A-Za-z0-9]+$' } }
   ]
 })
+accessor title: string;
 ```
 
 ## CLI Usage
@@ -121,6 +144,11 @@ npx contentful-orm sync --environment="staging"
 ```
 
 ## Best Practices
+
+### Decorator Usage
+- Use `accessor` keyword for all properties decorated with `@Field`
+- Keep decorators simple and focused
+- Use appropriate field types and validations
 
 ### Naming Conventions
 - Use PascalCase for content type classes

@@ -4,7 +4,7 @@
   "description": "Example blog using contentful-orm",
   "type": "module",
   "scripts": {
-    "sync": "tsc && node ../../dist/cli/index.js sync --path=\"dist/entities/**/*.js\"",
+    "sync": "node ../../dist/cli/index.js sync --path=\"dist/entities/**/*.js\"",
     "build": "tsc"
   },
   "dependencies": {

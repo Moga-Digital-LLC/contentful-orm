@@ -1,27 +1,31 @@
-import 'reflect-metadata';
 import { ContentTypeOptions, FieldOptions } from '../types/index.js';
 
-const CONTENT_TYPE_METADATA_KEY = 'contentful:content-type';
-const FIELD_METADATA_KEY = 'contentful:field';
+const contentTypeMetadataMap = new WeakMap<Function, ContentTypeOptions>();
+const fieldMetadataMap = new WeakMap<Function, Map<string, FieldOptions>>();
 
-export function ContentType(options: ContentTypeOptions): ClassDecorator {
-  return (target: Function) => {
-    Reflect.defineMetadata(CONTENT_TYPE_METADATA_KEY, options, target);
+export function ContentType(options: ContentTypeOptions) {
+  return function contentTypeDecorator<T extends { new (...args: any[]): {} }>(target: T) {
+    contentTypeMetadataMap.set(target, options);
+    return target;
   };
 }
 
-export function Field(options: FieldOptions): PropertyDecorator {
-  return (target: Object, propertyKey: string | symbol) => {
-    const existingFields = getFieldsMetadata(target.constructor) || new Map<string, FieldOptions>();
-    existingFields.set(propertyKey.toString(), options);
-    Reflect.defineMetadata(FIELD_METADATA_KEY, existingFields, target.constructor);
+export function Field(options: FieldOptions) {
+  return function fieldDecorator(target: ClassAccessorDecoratorTarget<any, any>, context: ClassAccessorDecoratorContext) {
+    const constructor = context.kind === 'getter' || context.kind === 'setter' 
+      ? context.getClassConstructor()
+      : context.target.constructor;
+    
+    const existingFields = fieldMetadataMap.get(constructor) || new Map<string, FieldOptions>();
+    existingFields.set(context.name.toString(), options);
+    fieldMetadataMap.set(constructor, existingFields);
   };
 }
 
 export function getContentTypeMetadata(target: Function): ContentTypeOptions | undefined {
-  return Reflect.getMetadata(CONTENT_TYPE_METADATA_KEY, target);
+  return contentTypeMetadataMap.get(target);
 }
 
 export function getFieldsMetadata(target: Function): Map<string, FieldOptions> {
-  return Reflect.getMetadata(FIELD_METADATA_KEY, target) || new Map<string, FieldOptions>();
+  return fieldMetadataMap.get(target) || new Map<string, FieldOptions>();
 }
