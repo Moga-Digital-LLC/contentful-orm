@@ -1,6 +1,6 @@
 {
   "name": "contentful-orm-blog-example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Example blog using contentful-orm",
   "type": "module",
   "main": "dist/index.js",
