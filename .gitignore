@@ -3,3 +3,6 @@ node_modules
 
 # Output
 dist
+
+# TypeScript
+tsconfig.tsbuildinfo
