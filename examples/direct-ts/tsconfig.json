@@ -11,10 +11,14 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "useDefineForClassFields": true,
-    "outDir": "./dist",
-    "declaration": true,
-    "sourceMap": true
+    "noEmit": true,
+    "allowImportingTsExtensions": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "dist", "examples"]
+  "ts-node": {
+    "skipIgnore": true,
+    "transpileOnly": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  },
+  "include": ["src"]
 }

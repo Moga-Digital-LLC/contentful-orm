@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
 
 @ContentType({
@@ -9,47 +10,59 @@ export class Author {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{
-      size: {
-        min: 2,
-        max: 100
-      }
-    }]
+    validations: [{ size: { min: 3, max: 100 } }]
   })
-  name!: string;
+  declare name: string;
 
   @Field({
     type: ContentfulFieldType.Text,
+    required: false
   })
-  email!: string;
+  declare title?: string;
 
   @Field({
-    type: ContentfulFieldType.RichText,
-    validations: [
-      {
-        enabledNodeTypes: [
-          'paragraph',
-          'heading-1',
-          'heading-2',
-          'unordered-list',
-          'ordered-list'
-        ]
-      },
-      {
-        enabledMarks: [
-          'bold',
-          'italic',
-          'underline'
-        ]
-      }
-    ]
+    type: ContentfulFieldType.Text,
+    required: false,
+    validations: [{ size: { max: 500 } }]
   })
-  bio!: any;
+  declare bio?: string;
 
   @Field({
     type: ContentfulFieldType.Media,
-    itemsLinkType: 'Asset',
-    validations: []
+    required: false,
+    validations: [
+      {
+        linkMimetypeGroup: ['image']
+      }
+    ]
   })
-  avatar!: any;
+  declare avatar?: any;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    required: false,
+    validations: [
+      {
+        regexp: {
+          pattern: '^https?://[\\w\\-]+(\\.[\\w\\-]+)+[/#?]?.*$',
+          flags: 'i'
+        }
+      }
+    ]
+  })
+  declare website?: string;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    required: false,
+    validations: [
+      {
+        regexp: {
+          pattern: '^https?://twitter\\.com/[\\w\\-]+/?$',
+          flags: 'i'
+        }
+      }
+    ]
+  })
+  declare twitter?: string;
 }

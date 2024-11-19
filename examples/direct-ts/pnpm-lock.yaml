@@ -14,19 +14,16 @@ importers:
       dotenv:
         specifier: ^16.3.1
         version: 16.4.5
-      reflect-metadata:
-        specifier: ^0.2.1
-        version: 0.2.2
-      rimraf:
-        specifier: ^4.4.0
-        version: 4.4.1
-      typescript:
-        specifier: ^5.3.3
-        version: 5.6.3
     devDependencies:
       '@types/node':
         specifier: ^20.11.19
         version: 20.17.6
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.17.6)(typescript@5.6.3)
+      typescript:
+        specifier: ^5.3.3
+        version: 5.6.3
 
 packages:
 
@@ -146,8 +143,8 @@ packages:
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
 
-  cross-spawn@7.0.5:
-    resolution: {integrity: sha512-ZVJrKKYunU38/76t0RMOulHOnUcbU9GbpWKAOZ0mhjr7CX6FVrH+4FrAapSOekrgFQ3f/8gwMEuIft0aKq6Hug==}
+  cross-spawn@7.0.6:
+    resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
 
   define-data-property@1.1.4:
@@ -310,8 +307,8 @@ packages:
   proxy-from-env@1.1.0:
     resolution: {integrity: sha512-D+zkORCbA9f1tdWRK0RaCR3GPv50cMxcrz4X8k5LTSUD1Dkw47mKJEZQNunItRTkWwgtaUSo1RVFRIG9ZXiFYg==}
 
-  qs@6.13.0:
-    resolution: {integrity: sha512-+38qI9SOr8tfZ4QmJNplMUxqjbe7LKvvZgWdExBOmd+egZTtjLB67Gu0HRX3u/XOq7UU2Nx6nsjvS16Z9uwfpg==}
+  qs@6.13.1:
+    resolution: {integrity: sha512-EJPeIn0CYrGu+hli1xilKAPXODtJ12T0sP63Ijx2/khC2JtuaN3JyNIpvmnkmaEtha9ocbG4A4cMcr+TvqvwQg==}
     engines: {node: '>=0.6'}
 
   reflect-metadata@0.2.2:
@@ -526,11 +523,11 @@ snapshots:
       lodash.isplainobject: 4.0.6
       lodash.isstring: 4.0.1
       p-throttle: 4.1.1
-      qs: 6.13.0
+      qs: 6.13.1
 
   create-require@1.1.1: {}
 
-  cross-spawn@7.0.5:
+  cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
       shebang-command: 2.0.0
@@ -568,7 +565,7 @@ snapshots:
 
   foreground-child@3.3.0:
     dependencies:
-      cross-spawn: 7.0.5
+      cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
   form-data@4.0.1:
@@ -672,7 +669,7 @@ snapshots:
 
   proxy-from-env@1.1.0: {}
 
-  qs@6.13.0:
+  qs@6.13.1:
     dependencies:
       side-channel: 1.0.6
 

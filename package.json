@@ -1,24 +1,31 @@
 {
   "name": "contentful-orm",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "A TypeScript-first ORM for Contentful CMS that enables a code-first approach to content modeling",
   "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "bin": {
-    "contentful-orm": "dist/cli/index.js"
+    "contentful-orm": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
   "files": [
     "dist",
+    "src",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
-    "prepare": "pnpm run build",
-    "test": "jest",
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
-    "cli": "ts-node src/cli/index.ts"
+    "prepare": "npm run build"
   },
   "keywords": [
     "contentful",
@@ -29,9 +36,6 @@
   ],
   "author": "Jeff Lee",
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
   "engines": {
     "node": ">=18.0.0"
   },
@@ -40,8 +44,10 @@
     "contentful-management": "^11.3.0",
     "dotenv": "^16.3.1",
     "glob": "^10.3.10",
-    "reflect-metadata": "^0.2.1",
-    "ts-node": "^10.9.2"
+    "rimraf": "^4.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "reflect-metadata": "^0.2.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.4",
@@ -50,7 +56,6 @@
     "@typescript-eslint/parser": "^6.14.0",
     "eslint": "^8.55.0",
     "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.3.3"
+    "ts-jest": "^29.1.1"
   }
 }

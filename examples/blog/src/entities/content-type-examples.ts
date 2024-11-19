@@ -138,14 +138,12 @@ export class Gallery {
   @Field({
     type: ContentfulFieldType.Array,
     itemsType: ContentfulFieldType.Text,
-    items: {
-      validations: [{
-        size: {
-          min: 1,
-          max: 20
-        }
-      }]
-    }
+    itemsValidations: [{
+      size: {
+        min: 1,
+        max: 20
+      }
+    }]
   })
   tags!: string[];
 
@@ -153,11 +151,9 @@ export class Gallery {
     type: ContentfulFieldType.Array,
     itemsType: ContentfulFieldType.Reference,
     itemsLinkType: 'Entry',
-    items: {
-      validations: [{
-        linkContentType: ['store']
-      }]
-    }
+    itemsValidations: [{
+      linkContentType: ['store']
+    }]
   })
   locations!: any[];
 }
@@ -196,11 +192,9 @@ export class Event {
     type: ContentfulFieldType.Array,
     itemsType: ContentfulFieldType.Reference,
     itemsLinkType: 'Entry',
-    items: {
-      validations: [{
-        linkContentType: ['person']
-      }]
-    }
+    itemsValidations: [{
+      linkContentType: ['person']
+    }]
   })
   attendees!: any[];
 }

@@ -1,0 +1,20 @@
+{
+  "name": "contentful-orm-direct-ts-example",
+  "version": "1.0.0",
+  "description": "Example using contentful-orm directly with TypeScript",
+  "type": "module",
+  "scripts": {
+    "sync": "node --loader ts-node/esm ../../src/cli/index.ts sync --path=\"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "start": "node --loader ts-node/esm src/index.ts"
+  },
+  "dependencies": {
+    "contentful-orm": "file:../..",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.19",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}

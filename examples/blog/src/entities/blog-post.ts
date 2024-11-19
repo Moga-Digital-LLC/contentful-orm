@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
 
 @ContentType({
@@ -12,7 +13,7 @@ export class BlogPost {
     localized: true,
     validations: [{ size: { min: 10, max: 200 } }]
   })
-  title!: string;
+  declare title: string;
 
   @Field({
     type: ContentfulFieldType.Text,
@@ -27,46 +28,46 @@ export class BlogPost {
       }
     ]
   })
-  slug!: string;
+  declare slug: string;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    required: true,
+    localized: true,
+    validations: [{ size: { min: 50, max: 500 } }]
+  })
+  declare summary: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
     required: true,
-    validations: [
+    localized: true
+  })
+  declare content: string;
+
+  @Field({
+    type: ContentfulFieldType.Date,
+    required: true
+  })
+  declare publishDate: Date;
+
+  @Field({
+    type: ContentfulFieldType.Boolean,
+    required: true
+  })
+  declare featured: boolean;
+
+  @Field({
+    type: ContentfulFieldType.Array,
+    itemsType: ContentfulFieldType.Text,
+    required: false,
+    itemsValidations: [
       {
-        enabledNodeTypes: [
-          'heading-1',
-          'heading-2',
-          'heading-3',
-          'paragraph',
-          'blockquote',
-          'embedded-asset-block',
-          'unordered-list',
-          'ordered-list',
-          'hr'
-        ]
-      },
-      {
-        enabledMarks: ['bold', 'italic', 'underline']
+        size: { min: 2, max: 20 }
       }
     ]
   })
-  content!: string;
-
-  @Field({
-    type: ContentfulFieldType.Text,
-    required: false,
-    localized: true,
-    validations: [{ size: { max: 300 } }]
-  })
-  excerpt?: string;
-
-  @Field({
-    type: ContentfulFieldType.Media,
-    itemsLinkType: 'Asset',
-    validations: []
-  })
-  featuredImage!: any;
+  declare tags?: string[];
 
   @Field({
     type: ContentfulFieldType.Reference,
@@ -77,69 +78,49 @@ export class BlogPost {
       }
     ]
   })
-  author!: string;
+  declare author: any;
 
   @Field({
     type: ContentfulFieldType.Array,
     itemsType: ContentfulFieldType.Reference,
-    itemsLinkType: 'Entry',
     required: false,
-    validations: [
+    itemsValidations: [
       {
-        size: { min: 1, max: 5 }
-      }
-    ],
-    items: {
-      validations: [
-        {
-          linkContentType: ['category']
-        }
-      ]
-    }
-  })
-  categories!: string[];
-
-  @Field({
-    type: ContentfulFieldType.Date,
-    required: true
-  })
-  publishDate!: string;
-
-  @Field({
-    type: ContentfulFieldType.Boolean,
-    required: true
-  })
-  featured!: boolean;
-
-  @Field({
-    type: ContentfulFieldType.Array,
-    itemsType: ContentfulFieldType.Text,
-    required: false,
-    validations: [
-      {
-        size: { max: 10 }
+        linkContentType: ['category']
       }
     ]
   })
-  tags?: string[];
+  declare categories?: any[];
 
   @Field({
-    type: ContentfulFieldType.Array,
-    itemsType: ContentfulFieldType.Reference,
-    itemsLinkType: 'Entry',
+    type: ContentfulFieldType.Media,
     required: false,
     validations: [
       {
-        size: { max: 3 }
+        linkMimetypeGroup: ['image']
       }
-    ],
-    items: {
-      validations: [
-        {
-          linkContentType: ['blogPost']
-        }
-      ]
-    }
+    ]
   })
-  relatedPosts?: string[];
+  declare featuredImage?: any;
+
+  @Field({
+    type: ContentfulFieldType.Array,
+    itemsType: ContentfulFieldType.Media,
+    required: false,
+    itemsValidations: [
+      {
+        linkMimetypeGroup: ['image']
+      }
+    ]
+  })
+  declare gallery?: any[];
+
+  @Field({
+    type: ContentfulFieldType.Location,
+    required: false
+  })
+  declare location?: {
+    lat: number;
+    lon: number;
+  };
 }

@@ -1,11 +1,6 @@
 #!/usr/bin/env node
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
 import { Command } from 'commander';
 import { sync } from './sync.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
 
 const program = new Command();
 
@@ -17,14 +12,15 @@ program
 program
   .command('sync')
   .description('Sync content types to Contentful')
-  .requiredOption('--path <path>', 'Path to entity files (glob pattern)')
+  .requiredOption('--path <pattern>', 'Glob pattern to find content type files')
   .action(async (options) => {
     try {
       await sync(options.path);
+      console.log('Sync completed successfully!');
     } catch (error) {
       console.error('Error during sync:', error);
       process.exit(1);
     }
   });
 
-program.parse();
+program.parse(process.argv);

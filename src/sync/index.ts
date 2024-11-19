@@ -48,21 +48,20 @@ export class ContentfulSync {
   }
 
   private transformFieldsToContentful(fieldsMap: Map<string, FieldOptions>) {
-    const fieldsMetadata = Object.fromEntries(fieldsMap);
-    return Object.entries(fieldsMetadata).map(([id, options]) => {
-      const field: ContentFields<any> = {
-        id,
-        name: id,
+    return Array.from(fieldsMap.entries()).map(([fieldName, options]) => {
+      const field: any = {
+        id: fieldName,
+        name: fieldName,
         type: CONTENTFUL_FIELD_TYPES[options.type],
         required: options.required ?? false,
         localized: options.localized ?? false,
-        validations: options.validations?.map((v: ContentfulValidation) => this.transformValidation(v)) ?? []
+        validations: options.validations?.map(v => this.transformValidation(v)) ?? []
       };
 
-      if (options.type === ContentfulFieldType.Array && options.itemsType) {
+      if (options.type === ContentfulFieldType.Array) {
         field.items = {
-          type: CONTENTFUL_FIELD_TYPES[options.itemsType],
-          validations: options.items?.validations?.map((v: ContentfulValidation) => this.transformValidation(v)) ?? []
+          type: CONTENTFUL_FIELD_TYPES[options.itemsType ?? ContentfulFieldType.Text],
+          validations: options.itemsValidations?.map(v => this.transformValidation(v)) ?? []
         };
 
         if (options.itemsLinkType) {
@@ -78,61 +77,59 @@ export class ContentfulSync {
     });
   }
 
-  async syncContentType(entity: Function): Promise<void> {
-    const contentTypeMetadata = getContentTypeMetadata(entity);
-    if (!contentTypeMetadata) {
-      throw new Error(`No content type metadata found for ${entity.name}`);
+  private async unpublishContentType(contentType: any) {
+    try {
+      if (contentType.isPublished()) {
+        await contentType.unpublish();
+      }
+    } catch (error) {
+      console.log('Content type was not published, continuing...');
+    }
+  }
+
+  async syncContentType(target: Function) {
+    const metadata = getContentTypeMetadata(target);
+    if (!metadata) {
+      throw new Error(`No content type metadata found for ${target.name}`);
     }
 
-    console.log(`Syncing content type: ${contentTypeMetadata.name}`);
-    const fieldsMetadata = getFieldsMetadata(entity);
-    const fields = this.transformFieldsToContentful(fieldsMetadata);
-    console.log('Transformed fields:', JSON.stringify(fields, null, 2));
+    const fields = this.transformFieldsToContentful(getFieldsMetadata(target));
+    const contentType = {
+      name: metadata.name,
+      displayField: metadata.displayField,
+      description: metadata.description,
+      fields
+    };
 
-    console.log(`Using space: ${this.spaceId}, environment: ${this.environmentId}`);
     const environment = await this.environment;
-
     try {
-      console.log(`Checking if content type ${contentTypeMetadata.name} exists...`);
-      const existingContentType = await environment.getContentType(contentTypeMetadata.name);
-      console.log('Content type exists, updating...');
+      // Get the latest version of the content type
+      const existingContentType = await environment.getContentType(metadata.name);
+      console.log(`Updating content type: ${metadata.name}`);
       
       // Unpublish first if published
-      if (existingContentType.sys.publishedVersion) {
+      if (existingContentType.isPublished()) {
         console.log('Unpublishing content type...');
         await existingContentType.unpublish();
       }
-      
+
       // Get the latest version after unpublishing
-      const latestVersion = await environment.getContentType(contentTypeMetadata.name);
+      const latestVersion = await environment.getContentType(metadata.name);
+      console.log('Updating content type with latest version...');
+      const updatedContentType = await latestVersion.update(contentType);
       
-      const updatedContentType = await latestVersion.update({
-        name: contentTypeMetadata.name,
-        displayField: contentTypeMetadata.displayField,
-        description: contentTypeMetadata.description,
-        fields
-      });
-      
-      console.log('Content type updated, publishing...');
+      // Publish the changes
+      console.log('Publishing content type...');
       await updatedContentType.publish();
-      console.log('Content type published successfully');
-    } catch (error) {
-      if (error instanceof Error && 'name' in error && error.name === 'NotFound') {
-        console.log('Content type not found, creating new...');
-        const contentType = await environment.createContentTypeWithId(
-          contentTypeMetadata.name,
-          {
-            name: contentTypeMetadata.name,
-            displayField: contentTypeMetadata.displayField,
-            description: contentTypeMetadata.description,
-            fields
-          }
-        );
-        console.log('Content type created, publishing...');
-        await contentType.publish();
-        console.log('Content type published successfully');
+      
+      console.log(`Successfully updated content type: ${metadata.name}`);
+    } catch (error: any) {
+      if (error.name === 'NotFound') {
+        console.log(`Creating content type: ${metadata.name}`);
+        const newContentType = await environment.createContentTypeWithId(metadata.name, contentType);
+        await newContentType.publish();
+        console.log(`Successfully created content type: ${metadata.name}`);
       } else {
-        console.error('Error:', error);
         throw error;
       }
     }

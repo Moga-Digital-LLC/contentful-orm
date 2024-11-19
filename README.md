@@ -2,8 +2,6 @@
 
 A TypeScript-first ORM for Contentful CMS that enables a code-first approach to content modeling. Define your content types using TypeScript decorators and automatically sync them with Contentful.
 
-> **Note**: This guide represents the current implementation approach until version 1.0 is released. The API and setup process may change in future releases.
-
 ## Features
 
 - 🎯 Code-First Development
@@ -43,194 +41,106 @@ Create a `.env` file in your project root:
 
 ```env
 CONTENTFUL_SPACE_ID=your_space_id
-CONTENTFUL_ACCESS_TOKEN=your_access_token
-CONTENTFUL_ENVIRONMENT=master  # or your preferred environment
+CONTENTFUL_ACCESS_TOKEN=your_management_access_token
+CONTENTFUL_ENVIRONMENT_ID=master  # or your preferred environment
 ```
+
+> **Important**: The `CONTENTFUL_ACCESS_TOKEN` should be a Management Access Token, not a Content Delivery/Preview token. You can generate one from Contentful's web app under Settings > API Keys > Content management tokens.
 
 #### 2. TypeScript Configuration
 
-Create a dedicated `tsconfig.contentful.json` for model compilation:
+Your `tsconfig.json` must include the following settings for decorators and metadata to work properly:
 
 ```json
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "useDefineForClassFields": false,
-    "outDir": "./dist/models",
-    "rootDir": "./src"
-  },
-  "include": ["src/models/**/*.ts"]
-}
-```
-
-#### 3. Package.json Scripts
-
-Add these scripts to your `package.json`:
-
-```json
-{
-  "scripts": {
-    "compile-models": "tsc --project tsconfig.contentful.json",
-    "sync": "pnpm compile-models && cross-env TS_NODE_PROJECT=./tsconfig.contentful.json ts-node ./node_modules/contentful-orm/dist/cli/index.js sync --path=\"dist/models/**/*.js\""
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "target": "ESNext"
   }
 }
 ```
 
-### Creating Models
+#### 3. Package Configuration
 
-Create your models in `src/models/` using TypeScript decorators:
+Update your `package.json` to include the following scripts:
 
+```json
+{
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && tsc",
+    "sync": "npm run build && contentful-orm sync --path=\"dist/entities/**/*.js\""
+  }
+}
+```
+
+Install the required dev dependencies:
+
+```bash
+pnpm add -D rimraf
+```
+
+### Entity Setup
+
+1. Create your entity files with `.ts` extension in your entities directory
+2. Use ES modules syntax with `.js` extensions in your import statements
+3. Export all entities from an `index.ts` file
+
+Example entity structure:
 ```typescript
-import 'reflect-metadata';
-import { ContentType, Field } from 'contentful-orm';
+// src/entities/author.ts
+import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
 
-@ContentType('teamMember')
-export class TeamMember {
+@ContentType({
+  name: 'author',
+  displayField: 'name',
+  description: 'Author of blog posts'
+})
+export class Author {
   @Field({
-    type: 'Symbol',
-    required: true,
-    validations: [{ size: { min: 2, max: 100 } }]
-  })
-  name: string;
-
-  @Field({
-    type: 'RichText',
+    type: ContentfulFieldType.Text,
     required: true,
     validations: [{
-      enabledNodeTypes: [
-        'paragraph',
-        'heading-1',
-        'heading-2',
-        'unordered-list',
-        'ordered-list'
-      ],
-      enabledMarks: ['bold', 'italic', 'underline']
+      size: { min: 2, max: 100 }
     }]
   })
-  bio: string;
-
-  @Field({
-    type: 'Link',
-    linkType: 'Asset',
-    validations: [{ linkMimetypeGroup: ['image'] }]
-  })
-  image?: string;
+  name!: string;
 }
+
+// src/entities/index.ts
+export * from './author.js';  // Note the .js extension
 ```
 
-### Available Field Types
+### Running the Sync
 
-- `Symbol`: For short text (< 256 characters)
-- `Text`: For longer text
-- `RichText`: For formatted text with markdown
-- `Integer`: For whole numbers
-- `Number`: For decimal numbers
-- `Date`: For dates and times
-- `Boolean`: For true/false values
-- `Link`: For references to assets or other entries
-- `Array`: For lists of items
-- `Object`: For JSON objects
+After setting up your entities and configuration:
 
-### Field Decorator Options
-
-```typescript
-interface FieldOptions {
-  type: string;
-  required?: boolean;
-  localized?: boolean;
-  linkType?: 'Asset' | 'Entry';
-  validations?: any[];
-  items?: {
-    type: string;
-    validations?: any[];
-    linkType?: string;
-  };
-}
-```
-
-### Syncing with Contentful
-
-1. Compile your models:
+1. Build your TypeScript files:
 ```bash
-pnpm run compile-models
+pnpm build
 ```
 
-2. Sync with Contentful:
+2. Run the sync command:
 ```bash
-pnpm run sync
+pnpm sync
 ```
 
-### Validation Rules
-
-Common validation options:
-
-```typescript
-// Size validation
-validations: [{ size: { min: 2, max: 100 } }]
-
-// Unique values
-validations: [{ unique: true }]
-
-// Rich text configuration
-validations: [{
-  enabledNodeTypes: ['paragraph', 'heading-1'],
-  enabledMarks: ['bold', 'italic']
-}]
-
-// Asset type validation
-validations: [{ linkMimetypeGroup: ['image'] }]
-
-// Array item validation
-items: {
-  type: 'Symbol',
-  validations: [{ size: { min: 2, max: 50 } }]
-}
-```
+The sync process will:
+- Build your TypeScript files
+- Find all entity files in the specified path
+- Create or update content types in Contentful
+- Handle versioning and publishing automatically
 
 ### Troubleshooting
 
-1. **Decorator Errors**
-   - Ensure `experimentalDecorators` and `emitDecoratorMetadata` are enabled in your TypeScript config
-   - Import `reflect-metadata` at the top of your model files
-
-2. **Module Resolution Issues**
-   - Use `moduleResolution: "bundler"` for ESM projects
-   - Ensure your project's `type` in `package.json` matches your module system
-
-3. **Sync Failures**
-   - Check your environment variables are correctly set
-   - Verify your Contentful access token has management API permissions
-   - Ensure your models are properly compiled before syncing
-
-### Best Practices
-
-1. **Model Organization**
-   - Keep models in a dedicated `src/models` directory
-   - One model per file
-   - Use clear, descriptive names for models and fields
-
-2. **Field Validation**
-   - Always add appropriate validations
-   - Set reasonable size limits for text fields
-   - Configure rich text fields with only necessary features
-
-3. **Type Safety**
-   - Use TypeScript's strict mode
-   - Define proper types for all fields
-   - Utilize interfaces for complex field types
-
-### Limitations
-
-- Contentful-orm currently works best with Node.js LTS versions
-- Some advanced Contentful features may require manual configuration
-- Changes to content types may require migration in production environments
+If you encounter sync issues:
+1. Ensure your Management Access Token has the correct permissions
+2. Check that all import paths use `.js` extensions
+3. Verify that your TypeScript configuration includes decorator and metadata settings
+4. Make sure all array field validations use `itemsValidations` instead of `items`
 
 ## Examples
 

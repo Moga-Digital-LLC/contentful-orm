@@ -27,9 +27,8 @@ export interface FieldOptions {
   validations?: ContentfulValidation[];
   itemsType?: ContentfulFieldTypeValues;
   itemsLinkType?: 'Entry' | 'Asset';
-  items?: {
-    validations?: ContentfulValidation[];
-  };
+  itemsValidations?: ContentfulValidation[];
+  defaultValue?: any;
 }
 
 export type { ContentfulField, ContentfulValidation, ContentfulEnvironmentId, ContentfulSpaceId };
