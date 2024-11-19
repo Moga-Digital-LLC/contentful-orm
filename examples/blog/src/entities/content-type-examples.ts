@@ -1,4 +1,4 @@
-import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
+import { ContentType, Field, MediaField, ReferenceField, ArrayField, ContentfulFieldType, Validations, SymbolField, IntegerField, ObjectField } from 'contentful-orm';
 
 // Example 1: Text and Rich Text Fields
 @ContentType({
@@ -10,18 +10,24 @@ export class Article {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{
-      size: {
-        min: 3,
-        max: 100
-      }
-    }]
+    validations: [Validations.size(3, 100)]
   })
   title!: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
-    required: true
+    required: true,
+    validations: [
+      Validations.enabledMarks(['bold', 'italic', 'underline']),
+      Validations.enabledNodeTypes([
+        'paragraph',
+        'heading-1',
+        'heading-2',
+        'ordered-list',
+        'unordered-list',
+        'blockquote'
+      ])
+    ]
   })
   content!: any;
 }
@@ -42,11 +48,7 @@ export class Product {
   @Field({
     type: ContentfulFieldType.Number,
     required: true,
-    validations: [{
-      range: {
-        min: 0
-      }
-    }]
+    validations: [Validations.range(0)]
   })
   price!: number;
 
@@ -76,10 +78,9 @@ export class Store {
   })
   location!: any;
 
-  @Field({
-    type: ContentfulFieldType.Media,
-    itemsLinkType: 'Asset',
-    validations: []
+  @MediaField({
+    required: true,
+    validations: [Validations.linkMimetypeGroup(['image'])]
   })
   storeImage!: any;
 }
@@ -103,23 +104,19 @@ export class Subscription {
   })
   isActive!: boolean;
 
-  @Field({
-    type: ContentfulFieldType.Reference,
-    required: false,
-    validations: [
-      {
-        linkContentType: ['product']
-      }
-    ]
+  @ReferenceField({
+    linkType: 'Entry',
+    required: true,
+    validations: [Validations.linkContentType(['product'])]
   })
-  relatedProduct!: any; // Reference to Product
+  product!: any;
 }
 
 // Example 5: Array Fields
 @ContentType({
   name: 'gallery',
   displayField: 'title',
-  description: 'Image gallery with tags and locations'
+  description: 'Photo gallery with tags and locations'
 })
 export class Gallery {
   @Field({
@@ -128,40 +125,35 @@ export class Gallery {
   })
   title!: string;
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Media,
-    itemsLinkType: 'Asset'
+    itemsLinkType: 'Asset',
+    required: true,
+    itemsValidations: [Validations.linkMimetypeGroup(['image'])]
   })
   images!: any[];
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Text,
-    itemsValidations: [{
-      size: {
-        min: 1,
-        max: 20
-      }
-    }]
+    required: false,
+    itemsValidations: [Validations.size(1, 20)]
   })
   tags!: string[];
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Reference,
     itemsLinkType: 'Entry',
-    itemsValidations: [{
-      linkContentType: ['store']
-    }]
+    required: false,
+    itemsValidations: [Validations.linkContentType(['store'])]
   })
   locations!: any[];
 }
 
+// Example 6: Event with Date Range and Attendees
 @ContentType({
   name: 'event',
   displayField: 'name',
-  description: 'Event with date, location, and attendees'
+  description: 'Event with date range and attendees'
 })
 export class Event {
   @Field({
@@ -188,13 +180,38 @@ export class Event {
   })
   location!: any;
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Reference,
     itemsLinkType: 'Entry',
-    itemsValidations: [{
-      linkContentType: ['person']
-    }]
+    required: false,
+    itemsValidations: [Validations.linkContentType(['person'])]
   })
   attendees!: any[];
+}
+
+// Example 7: Advanced Product with all field types
+@ContentType({
+  name: 'advancedProduct',
+  displayField: 'name',
+  description: 'Advanced product content type demonstrating all field types'
+})
+export class AdvancedProduct {
+  @SymbolField({ required: true })
+  name!: string;
+
+  @IntegerField()
+  stock!: number;
+
+  @ObjectField()
+  metadata!: Record<string, any>;
+
+  @Field({
+    type: ContentfulFieldType.Text
+  })
+  sku!: string;
+
+  @Field({
+    type: ContentfulFieldType.Text
+  })
+  internalNotes!: string;
 }

@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
+import { ContentType, Field, ContentfulFieldType, Validations } from 'contentful-orm';
 
 @ContentType({
   name: 'category',
@@ -10,7 +10,7 @@ export class Category {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{ size: { min: 3, max: 50 } }]
+    validations: [Validations.size(3, 50)]
   })
   declare name: string;
 
@@ -18,13 +18,8 @@ export class Category {
     type: ContentfulFieldType.Text,
     required: true,
     validations: [
-      { size: { min: 3, max: 50 } },
-      {
-        regexp: {
-          pattern: '^[a-z0-9-]+$',
-          flags: 'i'
-        }
-      }
+      Validations.size(3, 50),
+      Validations.regexp('^[a-z0-9-]+$', 'i')
     ]
   })
   declare slug: string;
@@ -32,7 +27,7 @@ export class Category {
   @Field({
     type: ContentfulFieldType.Text,
     required: false,
-    validations: [{ size: { max: 200 } }]
+    validations: [Validations.size(undefined, 200)]
   })
   declare description?: string;
 }

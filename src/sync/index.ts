@@ -7,15 +7,18 @@ type ContentTypeFieldValidation = any;
 type ContentFields<T> = any;
 
 const CONTENTFUL_FIELD_TYPES: Record<typeof ContentfulFieldType[keyof typeof ContentfulFieldType], string> = {
-  [ContentfulFieldType.Text]: 'Symbol',
+  [ContentfulFieldType.Symbol]: 'Symbol',
+  [ContentfulFieldType.Text]: 'Text',
   [ContentfulFieldType.RichText]: 'RichText',
   [ContentfulFieldType.Number]: 'Number',
+  [ContentfulFieldType.Integer]: 'Integer',
   [ContentfulFieldType.Date]: 'Date',
   [ContentfulFieldType.Location]: 'Location',
   [ContentfulFieldType.Media]: 'Link',
   [ContentfulFieldType.Boolean]: 'Boolean',
   [ContentfulFieldType.Reference]: 'Link',
-  [ContentfulFieldType.Array]: 'Array'
+  [ContentfulFieldType.Array]: 'Array',
+  [ContentfulFieldType.Object]: 'Object'
 } as const;
 
 export class ContentfulSync {
@@ -70,7 +73,7 @@ export class ContentfulSync {
       }
 
       if (options.type === ContentfulFieldType.Reference || options.type === ContentfulFieldType.Media) {
-        field.linkType = options.itemsLinkType ?? 'Entry';
+        field.linkType = options.type === ContentfulFieldType.Media ? 'Asset' : (options.linkType ?? 'Entry');
       }
 
       return field;

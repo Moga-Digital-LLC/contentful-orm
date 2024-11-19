@@ -17,15 +17,18 @@ A TypeScript-first ORM for Contentful CMS that enables a code-first approach to 
 
 The following field types are supported:
 
-- `Text` - For short text content (maps to Contentful's Symbol type)
+- `Symbol` - For short text content (Contentful's Symbol type)
+- `Text` - For long text content (Contentful's Text type)
 - `RichText` - For rich text content with formatting
-- `Number` - For numeric values
+- `Number` - For decimal numbers
+- `Integer` - For whole numbers
 - `Date` - For date and time values
 - `Location` - For geographical coordinates
 - `Media` - For media assets (images, videos, etc.)
 - `Boolean` - For true/false values
 - `Reference` - For references to other content types
 - `Array` - For arrays of any other supported type
+- `Object` - For JSON objects
 
 Each field type can be configured with additional options:
 
@@ -35,11 +38,211 @@ Each field type can be configured with additional options:
   required: true,                     // Whether the field is required
   localized: false,                   // Whether the field supports localization
   validations: [],                    // Array of validation rules
+  disabled: false,                    // Whether the field is read-only
+  omitted: false,                     // Whether the field is hidden
   // Array-specific options
   itemsType: ContentfulFieldType.Text,    // Type of array items (for Array type)
   itemsValidations: [],                   // Validations for array items
   itemsLinkType: 'Entry'                  // Link type for Reference/Media arrays
 })
+```
+
+## Specialized Field Decorators
+
+For better type safety and developer experience, specialized decorators are available for different field types:
+
+### Basic Fields
+
+```typescript
+@SymbolField({
+  required: true,
+  validations: [
+    Validations.size(1, 50)
+  ]
+})
+declare name: string;
+
+@IntegerField({
+  required: true,
+  validations: [
+    Validations.range(0, 100)
+  ]
+})
+declare quantity: number;
+
+@ObjectField()
+declare metadata: Record<string, any>;
+```
+
+### Media Fields
+
+```typescript
+@MediaField({
+  required: true,
+  validations: [
+    Validations.linkMimetypeGroup(['image'])
+  ]
+})
+declare featuredImage: any;
+```
+
+### Reference Fields
+
+```typescript
+@ReferenceField({
+  linkType: 'Entry',
+  required: true,
+  validations: [
+    Validations.linkContentType(['category'])
+  ]
+})
+declare category: any;
+```
+
+### Array Fields
+
+```typescript
+@ArrayField({
+  itemsType: ContentfulFieldType.Media,
+  itemsLinkType: 'Asset',
+  itemsValidations: [
+    Validations.linkMimetypeGroup(['image'])
+  ]
+})
+declare gallery?: any[];
+```
+
+## Validation Builders
+
+The library provides type-safe validation builders to help prevent runtime errors:
+
+```typescript
+import { Validations } from 'contentful-orm';
+
+// Text validations
+Validations.size(10, 100)           // Min/max length
+Validations.regexp('^[A-Z]', 'i')   // Regular expression with flags
+Validations.unique()                // Unique value
+
+// Number validations
+Validations.range(0, 100)           // Min/max value
+
+// Link validations
+Validations.linkContentType(['category', 'author'])  // Valid content types
+Validations.linkMimetypeGroup(['image', 'video'])    // Valid mime types
+
+// Rich text validations
+Validations.enabledMarks(['bold', 'italic'])         // Allowed formatting
+Validations.enabledNodeTypes(['paragraph', 'heading-1']) // Allowed blocks
+```
+
+## Complete Example
+
+Here's a complete example of a Product content type using all available field types:
+
+```typescript
+@ContentType({
+  name: 'product',
+  displayField: 'name',
+  description: 'A product with all available field types'
+})
+export class Product {
+  @SymbolField({
+    required: true,
+    validations: [
+      Validations.size(1, 50)
+    ]
+  })
+  declare name: string;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    required: true
+  })
+  declare description: string;
+
+  @Field({
+    type: ContentfulFieldType.RichText,
+    validations: [
+      Validations.enabledMarks(['bold', 'italic']),
+      Validations.enabledNodeTypes(['paragraph', 'heading-1'])
+    ]
+  })
+  declare details: any;
+
+  @IntegerField({
+    required: true,
+    validations: [
+      Validations.range(0)
+    ]
+  })
+  declare quantity: number;
+
+  @Field({
+    type: ContentfulFieldType.Number,
+    validations: [
+      Validations.range(0.01)
+    ]
+  })
+  declare price: number;
+
+  @Field({
+    type: ContentfulFieldType.Date,
+    required: true
+  })
+  declare releaseDate: Date;
+
+  @Field({
+    type: ContentfulFieldType.Location
+  })
+  declare storeLocation: any;
+
+  @MediaField({
+    required: true,
+    validations: [
+      Validations.linkMimetypeGroup(['image'])
+    ]
+  })
+  declare image: any;
+
+  @Field({
+    type: ContentfulFieldType.Boolean,
+    required: true
+  })
+  declare isAvailable: boolean;
+
+  @ReferenceField({
+    linkType: 'Entry',
+    validations: [
+      Validations.linkContentType(['category'])
+    ]
+  })
+  declare category: any;
+
+  @ArrayField({
+    itemsType: ContentfulFieldType.Reference,
+    itemsLinkType: 'Entry',
+    itemsValidations: [
+      Validations.linkContentType(['tag'])
+    ]
+  })
+  declare tags: any[];
+
+  @ObjectField()
+  declare metadata: Record<string, any>;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    disabled: true
+  })
+  declare sku: string;
+
+  @Field({
+    type: ContentfulFieldType.Text,
+    omitted: true
+  })
+  declare internalNotes: string;
+}
 ```
 
 ## Requirements

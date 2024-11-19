@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
+import { ContentType, Field, MediaField, ContentfulFieldType, Validations } from 'contentful-orm';
 
 @ContentType({
   name: 'author',
@@ -10,7 +10,7 @@ export class Author {
   @Field({
     type: ContentfulFieldType.Text,
     required: true,
-    validations: [{ size: { min: 3, max: 100 } }]
+    validations: [Validations.size(3, 100)]
   })
   declare name: string;
 
@@ -23,18 +23,13 @@ export class Author {
   @Field({
     type: ContentfulFieldType.Text,
     required: false,
-    validations: [{ size: { max: 500 } }]
+    validations: [Validations.size(undefined, 500)]
   })
   declare bio?: string;
 
-  @Field({
-    type: ContentfulFieldType.Media,
+  @MediaField({
     required: false,
-    validations: [
-      {
-        linkMimetypeGroup: ['image']
-      }
-    ]
+    validations: [Validations.linkMimetypeGroup(['image'])]
   })
   declare avatar?: any;
 
@@ -42,12 +37,7 @@ export class Author {
     type: ContentfulFieldType.Text,
     required: false,
     validations: [
-      {
-        regexp: {
-          pattern: '^https?://[\\w\\-]+(\\.[\\w\\-]+)+[/#?]?.*$',
-          flags: 'i'
-        }
-      }
+      Validations.regexp('^https?://[\\w\\-]+(\\.[\\w\\-]+)+[/#?]?.*$', 'i')
     ]
   })
   declare website?: string;
@@ -56,12 +46,7 @@ export class Author {
     type: ContentfulFieldType.Text,
     required: false,
     validations: [
-      {
-        regexp: {
-          pattern: '^https?://twitter\\.com/[\\w\\-]+/?$',
-          flags: 'i'
-        }
-      }
+      Validations.regexp('^@[\\w\\-]+$')
     ]
   })
   declare twitter?: string;

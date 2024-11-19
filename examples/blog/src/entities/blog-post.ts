@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { ContentType, Field, ContentfulFieldType } from 'contentful-orm';
+import { ContentType, Field, MediaField, ReferenceField, ArrayField, ContentfulFieldType, Validations } from 'contentful-orm';
 
 @ContentType({
   name: 'blogPost',
@@ -11,7 +11,7 @@ export class BlogPost {
     type: ContentfulFieldType.Text,
     required: true,
     localized: true,
-    validations: [{ size: { min: 10, max: 200 } }]
+    validations: [Validations.size(10, 200)]
   })
   declare title: string;
 
@@ -19,13 +19,8 @@ export class BlogPost {
     type: ContentfulFieldType.Text,
     required: true,
     validations: [
-      { size: { min: 5, max: 100 } },
-      {
-        regexp: {
-          pattern: '^[a-z0-9-]+$',
-          flags: 'i'
-        }
-      }
+      Validations.size(5, 100),
+      Validations.regexp('^[a-z0-9-]+$', 'i')
     ]
   })
   declare slug: string;
@@ -34,16 +29,34 @@ export class BlogPost {
     type: ContentfulFieldType.Text,
     required: true,
     localized: true,
-    validations: [{ size: { min: 50, max: 500 } }]
+    validations: [Validations.size(50, 500)]
   })
   declare summary: string;
 
   @Field({
     type: ContentfulFieldType.RichText,
     required: true,
-    localized: true
+    localized: true,
+    validations: [
+      Validations.enabledMarks(['bold', 'italic', 'underline']),
+      Validations.enabledNodeTypes([
+        'paragraph',
+        'heading-1',
+        'heading-2',
+        'heading-3',
+        'ordered-list',
+        'unordered-list',
+        'hr',
+        'blockquote',
+        'embedded-entry-block',
+        'embedded-asset-block',
+        'hyperlink',
+        'entry-hyperlink',
+        'asset-hyperlink'
+      ])
+    ]
   })
-  declare content: string;
+  declare content: any;
 
   @Field({
     type: ContentfulFieldType.Date,
@@ -57,70 +70,39 @@ export class BlogPost {
   })
   declare featured: boolean;
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Text,
     required: false,
-    itemsValidations: [
-      {
-        size: { min: 2, max: 20 }
-      }
-    ]
+    itemsValidations: [Validations.size(2, 20)]
   })
   declare tags?: string[];
 
-  @Field({
-    type: ContentfulFieldType.Reference,
+  @ReferenceField({
+    linkType: 'Entry',
     required: true,
-    validations: [
-      {
-        linkContentType: ['author']
-      }
-    ]
+    validations: [Validations.linkContentType(['author'])]
   })
   declare author: any;
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Reference,
+    itemsLinkType: 'Entry',
     required: false,
-    itemsValidations: [
-      {
-        linkContentType: ['category']
-      }
-    ]
+    itemsValidations: [Validations.linkContentType(['category'])]
   })
   declare categories?: any[];
 
-  @Field({
-    type: ContentfulFieldType.Media,
+  @MediaField({
     required: false,
-    validations: [
-      {
-        linkMimetypeGroup: ['image']
-      }
-    ]
+    validations: [Validations.linkMimetypeGroup(['image'])]
   })
   declare featuredImage?: any;
 
-  @Field({
-    type: ContentfulFieldType.Array,
+  @ArrayField({
     itemsType: ContentfulFieldType.Media,
+    itemsLinkType: 'Asset',
     required: false,
-    itemsValidations: [
-      {
-        linkMimetypeGroup: ['image']
-      }
-    ]
+    itemsValidations: [Validations.linkMimetypeGroup(['image'])]
   })
   declare gallery?: any[];
-
-  @Field({
-    type: ContentfulFieldType.Location,
-    required: false
-  })
-  declare location?: {
-    lat: number;
-    lon: number;
-  };
 }
