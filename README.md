@@ -13,6 +13,35 @@ A TypeScript-first ORM for Contentful CMS that enables a code-first approach to 
 - 🔗 Reference Field Support
 - ✨ Rich Text Support
 
+## Supported Field Types
+
+The following field types are supported:
+
+- `Text` - For short text content (maps to Contentful's Symbol type)
+- `RichText` - For rich text content with formatting
+- `Number` - For numeric values
+- `Date` - For date and time values
+- `Location` - For geographical coordinates
+- `Media` - For media assets (images, videos, etc.)
+- `Boolean` - For true/false values
+- `Reference` - For references to other content types
+- `Array` - For arrays of any other supported type
+
+Each field type can be configured with additional options:
+
+```typescript
+@Field({
+  type: ContentfulFieldType.Text,     // The field type
+  required: true,                     // Whether the field is required
+  localized: false,                   // Whether the field supports localization
+  validations: [],                    // Array of validation rules
+  // Array-specific options
+  itemsType: ContentfulFieldType.Text,    // Type of array items (for Array type)
+  itemsValidations: [],                   // Validations for array items
+  itemsLinkType: 'Entry'                  // Link type for Reference/Media arrays
+})
+```
+
 ## Requirements
 
 - TypeScript 5.2 or higher
