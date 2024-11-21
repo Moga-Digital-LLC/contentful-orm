@@ -243,7 +243,29 @@ export class Product {
   })
   declare internalNotes: string;
 }
-```
+
+## Examples
+
+The repository includes several examples to help you get started:
+
+### Blog Example
+A complete example of a blog implementation using Contentful ORM. Located in `/examples/blog`, this example demonstrates:
+- Full project structure
+- Entity definitions
+- Environment configuration
+- TypeScript configuration
+
+### Case Study Example
+A single-file example (`/examples/case-study.ts`) showing how to define a case study content type with:
+- Rich text content
+- Media fields
+- Reference fields
+- Field validations
+
+### Direct TypeScript Example
+Located in `/examples/direct-ts`, this example demonstrates direct TypeScript usage of the ORM.
+
+For more details, check out the examples in the repository's `/examples` directory.
 
 ## Requirements
 
@@ -318,8 +340,7 @@ pnpm add -D rimraf
 ### Entity Setup
 
 1. Create your entity files with `.ts` extension in your entities directory
-2. Use ES modules syntax with `.js` extensions in your import statements
-3. Export all entities from an `index.ts` file
+2. Export all entities from an `index.ts` file
 
 Example entity structure:
 ```typescript
@@ -341,9 +362,6 @@ export class Author {
   })
   name!: string;
 }
-
-// src/entities/index.ts
-export * from './author.js';  // Note the .js extension
 ```
 
 ### Running the Sync
@@ -373,12 +391,6 @@ If you encounter sync issues:
 2. Check that all import paths use `.js` extensions
 3. Verify that your TypeScript configuration includes decorator and metadata settings
 4. Make sure all array field validations use `itemsValidations` instead of `items`
-
-## Examples
-
-Check out the [examples](./examples) directory for complete working examples:
-- Blog example with authors, posts, and categories
-- Content type examples showcasing different field types and configurations
 
 ## Contributing
 
